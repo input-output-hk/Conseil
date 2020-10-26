@@ -28,7 +28,6 @@ CREATE TABLE mantis.blocks (
   gas_used text NOT NULL,
   logs_bloom text NOT NULL,
   miner text NOT NULL,
-  mix_hash text NOT NULL,
   nonce text NOT NULL,
   parent_hash text,
   receipts_root text NOT NULL,

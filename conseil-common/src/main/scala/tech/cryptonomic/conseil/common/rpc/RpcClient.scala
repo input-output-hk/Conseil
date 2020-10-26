@@ -82,7 +82,10 @@ class RpcClient[F[_]: Concurrent](
       // From JSON-RPC documentation: The Server MAY process a batch rpc call as a set of concurrent tasks,
       //                              processing them in any order and with any width of parallelism.
       // So we also can process the responses in unordered order.
-      .mapAsyncUnordered(maxConcurrent) { chunks =>
+
+      //TODO: separate the stream for mantis
+      //Originally it was .mapAsyncUnordered. It was changed to .mapAsync to store the blocks batches in order
+      .mapAsync(maxConcurrent) { chunks =>
         httpClient
           .expect[Seq[RpcResponse[R]]](
             Method.POST(chunks.toList, Uri.unsafeFromString(endpoint), headers: _*)
