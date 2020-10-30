@@ -6,12 +6,12 @@ import fs2.{Pipe, Stream}
 import io.circe.generic.auto._
 import org.http4s.circe.CirceEntityDecoder._
 import org.http4s.circe.CirceEntityEncoder._
-
-import tech.cryptonomic.conseil.common.ethereum.domain.{Bytecode, Contract, Token}
+import tech.cryptonomic.conseil.common.EvmDomain.{Bytecode, Contract, Token}
 import tech.cryptonomic.conseil.common.rpc.RpcClient
 import tech.cryptonomic.conseil.common.ethereum.rpc.EthereumRpcCommands._
 import tech.cryptonomic.conseil.common.ethereum.rpc.json.{Block, Transaction, TransactionReceipt}
-import tech.cryptonomic.conseil.common.ethereum.Utils
+import tech.cryptonomic.conseil.common.util.HexUtil.hexToString
+import tech.cryptonomic.conseil.common.util.CryptoUtil.keccak
 
 /**
   * Ethereum JSON-RPC client according to the specification at https://eth.wiki/json-rpc/API
@@ -107,7 +107,7 @@ class EthereumClient[F[_]: Concurrent](
           .map(
             contract =>
               Seq("name", "symbol", "decimals", "totalSupply")
-                .map(f => EthCall.request(contract.blockNumber, contract.address, s"0x${Utils.keccak(s"$f()")}"))
+                .map(f => EthCall.request(contract.blockNumber, contract.address, s"0x${keccak(s"$f()")}"))
           )
           .flatMap(Stream.emits)
           .through(client.stream[EthCall.Params, String](batchSize = 1))
@@ -119,8 +119,8 @@ class EthereumClient[F[_]: Concurrent](
                 address = contract.address,
                 blockHash = contract.blockHash,
                 blockNumber = contract.blockNumber,
-                name = Utils.hexToString(name),
-                symbol = Utils.hexToString(symbol),
+                name = hexToString(name),
+                symbol = hexToString(symbol),
                 decimals = decimals,
                 totalSupply = totalSupply
               )

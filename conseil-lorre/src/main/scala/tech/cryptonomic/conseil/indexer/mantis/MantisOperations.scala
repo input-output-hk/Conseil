@@ -10,7 +10,7 @@ import tech.cryptonomic.conseil.common.rpc.RpcClient
 import tech.cryptonomic.conseil.common.mantis.MantisPersistence
 import tech.cryptonomic.conseil.common.mantis.rpc.MantisClient
 import tech.cryptonomic.conseil.indexer.config.{Custom, Depth, Everything, Newest}
-import tech.cryptonomic.conseil.common.mantis.domain.{Bytecode, Contract}
+import tech.cryptonomic.conseil.common.EvmDomain.{Bytecode, Contract}
 
 /**
   * Mantis operations for Lorre.

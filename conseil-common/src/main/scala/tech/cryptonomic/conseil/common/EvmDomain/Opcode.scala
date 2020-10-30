@@ -1,6 +1,6 @@
-package tech.cryptonomic.conseil.common.mantis.domain
+package tech.cryptonomic.conseil.common.EvmDomain
 
 /**
-  * Mantis bytecode's opcode.
+  * Ethereum bytecode's opcode.
   */
 case class Opcode(offset: Int, instruction: Instruction, parameters: BigInt)

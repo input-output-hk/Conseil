@@ -1,7 +1,7 @@
-package tech.cryptonomic.conseil.common.mantis.domain
+package tech.cryptonomic.conseil.common.EvmDomain
 
 /**
-  * Mantis token.
+  * Ethereum token.
   */
 case class Token(
     address: String,

@@ -1,4 +1,4 @@
-package tech.cryptonomic.conseil.common.ethereum.domain
+package tech.cryptonomic.conseil.common.EvmDomain
 
 /**
   * Contract opcode instruction.

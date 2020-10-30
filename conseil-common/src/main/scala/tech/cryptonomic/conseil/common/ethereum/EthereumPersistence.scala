@@ -7,13 +7,12 @@ import cats.Id
 import cats.effect.{Concurrent, Resource}
 import com.typesafe.scalalogging.LazyLogging
 import slick.jdbc.PostgresProfile.api._
-
-import tech.cryptonomic.conseil.common.util.Conversion
+import tech.cryptonomic.conseil.common.util.{Conversion, HexUtil}
 import tech.cryptonomic.conseil.common.util.Conversion.Syntax._
 import tech.cryptonomic.conseil.common.ethereum.rpc.json.{Block, Log, Transaction}
 import tech.cryptonomic.conseil.common.ethereum.EthereumPersistence._
 import tech.cryptonomic.conseil.common.ethereum.rpc.json.TransactionReceipt
-import tech.cryptonomic.conseil.common.ethereum.domain.{Contract, Token}
+import tech.cryptonomic.conseil.common.EvmDomain.{Contract, Token}
 
 /**
   * Ethereum persistence into the database using Slick.
@@ -154,7 +153,7 @@ object EthereumPersistence {
           nonce = from.nonce,
           to = from.to,
           transactionIndex = from.transactionIndex,
-          value = Utils.hexStringToBigDecimal(from.value),
+          value = HexUtil.hexStringToBigDecimal(from.value),
           v = from.v,
           r = from.r,
           s = from.s
@@ -235,7 +234,7 @@ object EthereumPersistence {
           transactionHash = from.transactionHash,
           fromAddress = from.topics(1),
           toAddress = from.topics(2),
-          value = Utils.hexStringToBigDecimal(from.data)
+          value = HexUtil.hexStringToBigDecimal(from.data)
         )
     }
 

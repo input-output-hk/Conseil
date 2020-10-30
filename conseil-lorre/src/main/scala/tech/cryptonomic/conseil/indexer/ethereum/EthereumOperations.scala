@@ -10,7 +10,7 @@ import tech.cryptonomic.conseil.common.rpc.RpcClient
 import tech.cryptonomic.conseil.common.ethereum.EthereumPersistence
 import tech.cryptonomic.conseil.common.ethereum.rpc.EthereumClient
 import tech.cryptonomic.conseil.indexer.config.{Custom, Depth, Everything, Newest}
-import tech.cryptonomic.conseil.common.ethereum.domain.{Bytecode, Contract}
+import tech.cryptonomic.conseil.common.EvmDomain.{Bytecode, Contract}
 
 /**
   * Ethereum operations for Lorre.

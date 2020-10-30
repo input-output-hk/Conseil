@@ -1,6 +1,6 @@
-package tech.cryptonomic.conseil.common.ethereum.domain
+package tech.cryptonomic.conseil.common.EvmDomain
 
-import tech.cryptonomic.conseil.common.ethereum.Utils
+import tech.cryptonomic.conseil.common.util.CryptoUtil.keccak
 
 /**
   * Ethereum contract bytecode disassembler.
@@ -70,7 +70,7 @@ case class Bytecode(value: String) {
     */
   def implements(function: String): Boolean =
     opcodes.exists(
-      o => o.instruction.name == "PUSH4" && o.parameters == BigInt(Utils.keccak(function), 16)
+      o => o.instruction.name == "PUSH4" && o.parameters == BigInt(keccak(function), 16)
     )
 
   // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md

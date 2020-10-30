@@ -83,8 +83,14 @@ class RpcClient[F[_]: Concurrent](
       //                              processing them in any order and with any width of parallelism.
       // So we also can process the responses in unordered order.
 
-      //TODO: separate the stream for mantis
-      //Originally it was .mapAsyncUnordered. It was changed to .mapAsync to store the blocks batches in order
+      //TODO: separate the stream for mantis/revert change if we prioritize performance while fetching batches
+      // - This change affects every platform performance-wise.
+      // - Before changes: block batches were stored as they were received with .mapAsyncUnordered
+      //   so more often than not, they didn't get stored in order
+      // - The motivations for this change are
+      //      - Avoid having to order blocks every time they are queried from the API
+      //      - Avoid having to order post-insertion
+      //      - Indexing in batches is done only once (when the indexer stores the whole blockchain for the first time)
       .mapAsync(maxConcurrent) { chunks =>
         httpClient
           .expect[Seq[RpcResponse[R]]](

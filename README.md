@@ -145,6 +145,17 @@ There is a reference file in the respository -> `~/mantis-conseil/mantis.conf`
 **2.2 Running lorre (platform to index should be running)**
 
 The configuration file is the one from section [1.5]. The arguments are tha platform and the network, both should be previously configured in `platforms` as described in section [1.5]
+
+**Using sbt**
+```sh
+sbt "runLorre mantis testnet" -Dconfig.file='<platform> <network>'
+```
+For example, using the configuration file in section [1.5] to run mantis/testnet indexer:
+```sh
+sbt "runLorre mantis testnet" -Dconfig.file='/home/<username>/mantis-indexer-api/mantis.conf'
+```
+**Using the `.jar` files**
+
 ```sh
 $ java -Dconfig.file='<path/to/config/file.conf>' -jar conseil-lorre.jar <platform> <network>
 ```
@@ -153,9 +164,19 @@ For example, using the configuration file in section [1.5] and the `.jar` files 
 ```sh
 $ java -Dconfig.file='/home/<username>/mantis-indexer-api/mantis.conf' -jar mantis-lorre.jar mantis testnet
 ```
-**2.3 Running conseil-api** 
+**2.3 Running conseil-api**
 
-The configuration file is the one from section [1.5]. No mantis node is needed. 
+The configuration file is the one from section [1.5]. No mantis node is needed.
+
+**Using sbt**
+```sh
+sbt "runApi" -Dconfig.file='<platform> <network>'
+```
+For example, using the configuration file in section [1.5] to run mantis/testnet indexer:
+```sh
+sbt "runApi" -Dconfig.file='/home/<username>/mantis-indexer-api/mantis.conf'
+```
+**Using the `.jar` files**
 ```sh
 $ java -Dconfig.file='<path/to/config/file.conf>' -jar conseil-lorre.jar
 ```
