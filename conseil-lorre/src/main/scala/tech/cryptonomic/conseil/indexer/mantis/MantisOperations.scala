@@ -1,30 +1,30 @@
-package tech.cryptonomic.conseil.indexer.ethereum
+package tech.cryptonomic.conseil.indexer.mantis
 
 import cats.effect.{Concurrent, Resource}
 import com.typesafe.scalalogging.LazyLogging
 import fs2.Stream
 import slickeffect.Transactor
 
-import tech.cryptonomic.conseil.common.config.Platforms.EthereumBatchFetchConfiguration
+import tech.cryptonomic.conseil.common.config.Platforms.MantisBatchFetchConfiguration
 import tech.cryptonomic.conseil.common.rpc.RpcClient
-import tech.cryptonomic.conseil.common.ethereum.EthereumPersistence
-import tech.cryptonomic.conseil.common.ethereum.rpc.EthereumClient
+import tech.cryptonomic.conseil.common.mantis.MantisPersistence
+import tech.cryptonomic.conseil.common.mantis.rpc.MantisClient
 import tech.cryptonomic.conseil.indexer.config.{Custom, Depth, Everything, Newest}
-import tech.cryptonomic.conseil.common.ethereum.domain.{Bytecode, Contract}
+import tech.cryptonomic.conseil.common.mantis.domain.{Bytecode, Contract}
 
 /**
-  * Ethereum operations for Lorre.
+  * Mantis operations for Lorre.
   *
-  * @param ethereumClient JSON-RPC client to communicate with the Ethereum node
-  * @param persistence DB persistence methods for the Ethereum blockchain
+  * @param mantisClient JSON-RPC client to communicate with the Mantis node
+  * @param persistence DB persistence methods for the Mantis blockchain
   * @param tx [[slickeffect.Transactor]] to perform a Slick operations on the database
   * @param batchConf Configuration containing batch fetch values
   */
-class EthereumOperations[F[_]: Concurrent](
-    ethereumClient: EthereumClient[F],
-    persistence: EthereumPersistence[F],
+class MantisOperations[F[_]: Concurrent](
+    mantisClient: MantisClient[F],
+    persistence: MantisPersistence[F],
     tx: Transactor[F],
-    batchConf: EthereumBatchFetchConfiguration
+    batchConf: MantisBatchFetchConfiguration
 ) extends LazyLogging {
 
   /**
@@ -35,7 +35,7 @@ class EthereumOperations[F[_]: Concurrent](
   def loadBlocksAndLogs(depth: Depth): Stream[F, Unit] =
     Stream
       .eval(tx.transact(persistence.getLatestIndexedBlock))
-      .zip(ethereumClient.getMostRecentBlockNumber.map(Integer.decode))
+      .zip(mantisClient.getMostRecentBlockNumber.map(Integer.decode))
       .flatMap {
         case (latestIndexedBlock, mostRecentBlockNumber) =>
           val range = depth match {
@@ -52,7 +52,7 @@ class EthereumOperations[F[_]: Concurrent](
       }
 
   /**
-    * Get blocks from Ethereum node through Ethereum client and save them into the database using Slick.
+    * Get blocks from Mantis node through Mantis client and save them into the database using Slick.
     * In the beginning, the current list of blocks is obtained from the database and removed from the computation.
     *
     * @param range Inclusive range of the block's height
@@ -66,12 +66,12 @@ class EthereumOperations[F[_]: Concurrent](
             .range(range.start, range.end)
             .filter(height => !existingBlocks.contains(height))
             .map(n => s"0x${n.toHexString}")
-            .through(ethereumClient.getBlockByNumber(batchConf.blocksBatchSize))
+            .through(mantisClient.getBlockByNumber(batchConf.blocksBatchSize))
             .flatMap {
               case block if block.transactions.size > 0 =>
                 Stream
                   .emit(block)
-                  .through(ethereumClient.getTransactions(batchConf.transactionsBatchSize))
+                  .through(mantisClient.getTransactions(batchConf.transactionsBatchSize))
                   .chunkN(Integer.MAX_VALUE)
                   .map(txs => (block, txs.toList))
               case block => Stream.emit((block, Nil))
@@ -80,7 +80,7 @@ class EthereumOperations[F[_]: Concurrent](
               case (block, txs) if block.transactions.size > 0 =>
                 Stream
                   .emits(txs)
-                  .through(ethereumClient.getTransactionReceipt)
+                  .through(mantisClient.getTransactionReceipt)
                   .chunkN(Integer.MAX_VALUE)
                   .map(receipts => (block, txs, receipts.toList))
               case (block, txs) => Stream.emit((block, Nil, Nil))
@@ -102,7 +102,7 @@ class EthereumOperations[F[_]: Concurrent](
               case (block, txs, receipts) =>
                 Stream
                   .emits(receipts.filter(_.contractAddress.isDefined))
-                  .through(ethereumClient.getContract(batchConf.contractsBatchSize))
+                  .through(mantisClient.getContract(batchConf.contractsBatchSize))
                   .chunkN(Integer.MAX_VALUE)
                   .evalTap(contracts => tx.transact(persistence.createContracts(contracts.toList)))
             }
@@ -129,7 +129,7 @@ class EthereumOperations[F[_]: Concurrent](
             bytecode = Bytecode(row.bytecode)
           )
       )
-      .through(ethereumClient.getTokenInfo)
+      .through(mantisClient.getTokenInfo)
       .evalTap(token => Concurrent[F].delay(logger.info(s"Save token: ${token.name}")))
       .chunkN(batchConf.tokensBatchSize)
       .evalTap(tokens => tx.transact(persistence.createTokens(tokens.toList)))
@@ -137,22 +137,22 @@ class EthereumOperations[F[_]: Concurrent](
 
 }
 
-object EthereumOperations {
+object MantisOperations {
 
   /**
-    * Create [[cats.Resource]] with [[EthereumOperations]].
+    * Create [[cats.Resource]] with [[MantisOperations]].
     *
-    * @param rpcClient JSON-RPC client to communicate with the Ethereum node
+    * @param rpcClient JSON-RPC client to communicate with the Mantis node
     * @param tx [[slickeffect.Transactor]] to perform a Slick operations on the database
     * @param batchConf Configuration containing batch fetch values
     */
   def resource[F[_]: Concurrent](
       rpcClient: RpcClient[F],
       tx: Transactor[F],
-      batchConf: EthereumBatchFetchConfiguration
-  ): Resource[F, EthereumOperations[F]] =
+      batchConf: MantisBatchFetchConfiguration
+  ): Resource[F, MantisOperations[F]] =
     for {
-      ethereumClient <- EthereumClient.resource(rpcClient)
-      persistence <- EthereumPersistence.resource
-    } yield new EthereumOperations[F](ethereumClient, persistence, tx, batchConf)
+      mantisClient <- MantisClient.resource(rpcClient)
+      persistence <- MantisPersistence.resource
+    } yield new MantisOperations[F](mantisClient, persistence, tx, batchConf)
 }

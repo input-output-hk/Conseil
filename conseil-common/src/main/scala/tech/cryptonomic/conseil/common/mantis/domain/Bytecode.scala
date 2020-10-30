@@ -1,9 +1,9 @@
-package tech.cryptonomic.conseil.common.ethereum.domain
+package tech.cryptonomic.conseil.common.mantis.domain
 
 import tech.cryptonomic.conseil.common.ethereum.Utils
 
 /**
-  * Ethereum contract bytecode disassembler.
+  * Mantis contract bytecode disassembler.
   * It allows to chech if given contract is ERC20 or ERC721.
   * The code is based on https://github.com/ethereum/evmdasm
   */

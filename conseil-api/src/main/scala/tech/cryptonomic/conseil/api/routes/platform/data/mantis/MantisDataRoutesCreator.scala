@@ -1,0 +1,165 @@
+package tech.cryptonomic.conseil.api.routes.platform.data.mantis
+
+import akka.http.scaladsl.server.Directives.concat
+import akka.http.scaladsl.server.Route
+import cats.instances.either._
+import cats.instances.future._
+import cats.syntax.bitraverse._
+import com.typesafe.scalalogging.LazyLogging
+import tech.cryptonomic.conseil.api.metadata.MetadataService
+import tech.cryptonomic.conseil.api.routes.platform.data.ApiDataRoutes
+import tech.cryptonomic.conseil.common.config.MetadataConfiguration
+import tech.cryptonomic.conseil.common.mantis.MantisTypes.MantisBlockHash
+import tech.cryptonomic.conseil.common.generic.chain.DataTypes.QueryResponseWithOutput
+import tech.cryptonomic.conseil.common.metadata
+import tech.cryptonomic.conseil.common.metadata.{EntityPath, NetworkPath, PlatformPath}
+
+import scala.concurrent.{ExecutionContext, Future}
+
+/** Trait, which contains routes for Mantis-related block-chains */
+trait MantisDataRoutesCreator extends MantisDataHelpers with MantisDataEndpoints with ApiDataRoutes with LazyLogging {
+
+  implicit def executionContext: ExecutionContext
+
+  /** Metadata service used to validate incoming queries */
+  def metadataService: MetadataService
+
+  /** Metadata configuration used to validate visibility */
+  def metadataConfiguration: MetadataConfiguration
+
+  /** Data operations used for fetching the data from database */
+  def operations: MantisDataOperations
+
+  /** Maximum number of results returned from API */
+  def maxQueryResultSize: Int
+
+  /** Path for the specific platform */
+  def platform: PlatformPath
+
+  /** V2 Route implementation for query endpoint */
+  override val postRoute: Route = queryEndpoint.implementedByAsync {
+    case ((platform, network, entity), apiQuery, _) =>
+      val path = EntityPath(entity, NetworkPath(network, PlatformPath(platform)))
+      pathValidation(path) {
+        apiQuery
+          .validate(path, metadataService, metadataConfiguration)
+          .flatMap { validationResult =>
+            validationResult.map { validQuery =>
+              operations.queryWithPredicates(platform, entity, validQuery.withLimitCap(maxQueryResultSize)).map {
+                queryResponses =>
+                  QueryResponseWithOutput(queryResponses, validQuery.output)
+              }
+            }.left.map(Future.successful).bisequence
+          }
+          .map(Some(_))
+      }
+  }
+
+  /** V2 Route implementation for blocks endpoint */
+  private val blocksRoute: Route = delegateCall(mantisBlocksEndpoint)(
+    filter => operations.fetchBlocks(filter.toQuery.withLimitCap(maxQueryResultSize))
+  )
+
+  /** V2 Route implementation for blocks head endpoint */
+  private val blocksHeadRoute: Route = delegateCall0(mantisBlocksHeadEndpoint)(operations.fetchBlocksHead)
+
+  /** V2 Route implementation for blocks by hash endpoint */
+  private val blockByHashRoute: Route =
+    delegateCall(mantisBlockByHashEndpoint)(hash => operations.fetchBlockByHash(MantisBlockHash(hash)))
+
+  /** V2 Route implementation for transactions endpoint */
+  private val transactionsRoute: Route = delegateCall(mantisTransactionsEndpoint)(
+    filter => operations.fetchTransactions(filter.toQuery.withLimitCap(maxQueryResultSize))
+  )
+
+  /** V2 Route implementation for transaction by id endpoint */
+  private val transactionByIdRoute: Route =
+    delegateCall(mantisTransactionByHashEndpoint)(operations.fetchTransactionByHash)
+
+  /** V2 Route implementation for logs endpoint */
+  private val logsRoute: Route =
+    delegateCall(mantisLogsEndpoint)(filter => operations.fetchLogs(filter.toQuery.withLimitCap(maxQueryResultSize)))
+
+  /** V2 Route implementation for receipts endpoint */
+  private val receiptsRoute: Route = delegateCall(mantisReceiptsEndpoint)(
+    filter => operations.fetchReceipts(filter.toQuery.withLimitCap(maxQueryResultSize))
+  )
+
+  /** V2 Route implementation for contracts endpoint */
+  private val contractsRoute: Route = delegateCall(mantisContractsEndpoint)(
+    filter => operations.fetchContracts(filter.toQuery.withLimitCap(maxQueryResultSize))
+  )
+
+  /** V2 Route implementation for tokens endpoint */
+  private val tokensRoute: Route = delegateCall(mantisTokensEndpoint)(
+    filter => operations.fetchTokens(filter.toQuery.withLimitCap(maxQueryResultSize))
+  )
+
+  /** V2 Route implementation for token transfers endpoint */
+  private val tokenTransfersRoute: Route = delegateCall(mantisTokenTransfersEndpoint)(
+    filter => operations.fetchTokenTransfers(filter.toQuery.withLimitCap(maxQueryResultSize))
+  )
+
+  /** V2 Route implementation for accounts endpoint */
+  private val accountsRoute: Route = delegateCall(mantisAccountsEndpoint)(
+    filter => operations.fetchAccounts(filter.toQuery.withLimitCap(maxQueryResultSize))
+  )
+
+  /** V2 Route implementation for accounts by address endpoint */
+  private val accountsByAddressRoute: Route =
+    delegateCall(mantisAccountByAddressEndpoint)(operations.fetchAccountByAddress)
+
+  /**
+    * Helper method, which validates the network and delegates the call for specific endpoint to the given method `f`.
+    * Note that this method works only for Tuple2 input parameters in the `endpoint`.
+    **/
+  private def delegateCall0[B](
+      endpoint: Endpoint[(String, Option[String]), Option[B]]
+  )(f: () => Future[Option[B]]): Route =
+    endpoint.implementedByAsync {
+      case (network, _) => platformNetworkValidation(network)(f())
+    }
+
+  /**
+    * Helper method, which validates the network and delegates the call for specific endpoint to the given method `f`.
+    * Note that this method works for more generic input type in the `endpoint`.
+    **/
+  private def delegateCall[A, B](
+      endpoint: Endpoint[((String, A), Option[String]), Option[B]]
+  )(f: A => Future[Option[B]]): Route =
+    endpoint.implementedByAsync {
+      case ((network, element), _) => platformNetworkValidation(network)(f(element))
+    }
+
+  /** V2 concatenated routes */
+  override val getRoute: Route =
+    concat(
+      blocksHeadRoute,
+      blockByHashRoute,
+      blocksRoute,
+      transactionsRoute,
+      transactionByIdRoute,
+      logsRoute,
+      receiptsRoute,
+      contractsRoute,
+      tokensRoute,
+      tokenTransfersRoute,
+      accountsRoute,
+      accountsByAddressRoute
+    )
+
+  /** Function for validation of the platform and network with flatten */
+  private def platformNetworkValidation[A](network: String)(
+      operation: => Future[Option[A]]
+  ): Future[Option[A]] =
+    pathValidation(NetworkPath(network, platform))(operation)
+
+  private def pathValidation[A](path: metadata.Path)(
+      operation: => Future[Option[A]]
+  ): Future[Option[A]] =
+    if (metadataService.exists(path))
+      operation
+    else
+      Future.successful(None)
+
+}

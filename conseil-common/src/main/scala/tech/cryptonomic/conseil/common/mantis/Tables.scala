@@ -1,4 +1,4 @@
-package tech.cryptonomic.conseil.common.ethereum
+package tech.cryptonomic.conseil.common.mantis
 // AUTO-GENERATED Slick data model
 /** Stand-alone Slick data model for immediate use */
 object Tables extends {
@@ -35,7 +35,6 @@ trait Tables {
     *  @param gasUsed Database column gas_used SqlType(text)
     *  @param logsBloom Database column logs_bloom SqlType(text)
     *  @param miner Database column miner SqlType(text)
-    *  @param mixHash Database column mix_hash SqlType(text)
     *  @param nonce Database column nonce SqlType(text)
     *  @param parentHash Database column parent_hash SqlType(text), Default(None)
     *  @param receiptsRoot Database column receipts_root SqlType(text)
@@ -55,7 +54,6 @@ trait Tables {
       gasUsed: String,
       logsBloom: String,
       miner: String,
-      mixHash: String,
       nonce: String,
       parentHash: Option[String] = None,
       receiptsRoot: String,
@@ -87,7 +85,6 @@ trait Tables {
         <<[String],
         <<[String],
         <<[String],
-        <<[String],
         <<?[String],
         <<[String],
         <<[String],
@@ -102,7 +99,7 @@ trait Tables {
   }
 
   /** Table description of table blocks. Objects of this class serve as prototypes for rows in queries. */
-  class Blocks(_tableTag: Tag) extends profile.api.Table[BlocksRow](_tableTag, Some("ethereum"), "blocks") {
+  class Blocks(_tableTag: Tag) extends profile.api.Table[BlocksRow](_tableTag, Some("mantis"), "blocks") {
     def * =
       (
         hash,
@@ -113,7 +110,6 @@ trait Tables {
         gasUsed,
         logsBloom,
         miner,
-        mixHash,
         nonce,
         parentHash,
         receiptsRoot,
@@ -138,7 +134,6 @@ trait Tables {
           Rep.Some(gasUsed),
           Rep.Some(logsBloom),
           Rep.Some(miner),
-          Rep.Some(mixHash),
           Rep.Some(nonce),
           parentHash,
           Rep.Some(receiptsRoot),
@@ -166,16 +161,15 @@ trait Tables {
                   _7.get,
                   _8.get,
                   _9.get,
-                  _10.get,
-                  _11,
+                  _10,
+                  _11.get,
                   _12.get,
                   _13.get,
                   _14.get,
                   _15.get,
                   _16.get,
-                  _17.get,
-                  _18,
-                  _19.get
+                  _17,
+                  _18.get
                 )
               )
           )
@@ -206,9 +200,6 @@ trait Tables {
 
     /** Database column miner SqlType(text) */
     val miner: Rep[String] = column[String]("miner")
-
-    /** Database column mix_hash SqlType(text) */
-    val mixHash: Rep[String] = column[String]("mix_hash")
 
     /** Database column nonce SqlType(text) */
     val nonce: Rep[String] = column[String]("nonce")
@@ -268,7 +259,7 @@ trait Tables {
   }
 
   /** Table description of table contracts. Objects of this class serve as prototypes for rows in queries. */
-  class Contracts(_tableTag: Tag) extends profile.api.Table[ContractsRow](_tableTag, Some("ethereum"), "contracts") {
+  class Contracts(_tableTag: Tag) extends profile.api.Table[ContractsRow](_tableTag, Some("mantis"), "contracts") {
     def * =
       (address, blockHash, blockNumber, bytecode, isErc20, isErc721) <> (ContractsRow.tupled, ContractsRow.unapply)
 
@@ -343,7 +334,7 @@ trait Tables {
   }
 
   /** Table description of table logs. Objects of this class serve as prototypes for rows in queries. */
-  class Logs(_tableTag: Tag) extends profile.api.Table[LogsRow](_tableTag, Some("ethereum"), "logs") {
+  class Logs(_tableTag: Tag) extends profile.api.Table[LogsRow](_tableTag, Some("mantis"), "logs") {
     def * =
       (address, blockHash, blockNumber, data, logIndex, removed, topics, transactionHash, transactionIndex) <> (LogsRow.tupled, LogsRow.unapply)
 
@@ -396,8 +387,8 @@ trait Tables {
     /** Database column transaction_index SqlType(text) */
     val transactionIndex: Rep[String] = column[String]("transaction_index")
 
-    /** Foreign key referencing Blocks (database name ethereum_logs_block_hash_fkey) */
-    lazy val blocksFk = foreignKey("ethereum_logs_block_hash_fkey", blockHash, Blocks)(
+    /** Foreign key referencing Blocks (database name mantis_logs_block_hash_fkey) */
+    lazy val blocksFk = foreignKey("mantis_logs_block_hash_fkey", blockHash, Blocks)(
       r => r.hash,
       onUpdate = ForeignKeyAction.NoAction,
       onDelete = ForeignKeyAction.NoAction
@@ -452,7 +443,7 @@ trait Tables {
     }
 
   /** Table description of table receipts. Objects of this class serve as prototypes for rows in queries. */
-  class Receipts(_tableTag: Tag) extends profile.api.Table[ReceiptsRow](_tableTag, Some("ethereum"), "receipts") {
+  class Receipts(_tableTag: Tag) extends profile.api.Table[ReceiptsRow](_tableTag, Some("mantis"), "receipts") {
     def * =
       (
         transactionHash,
@@ -549,7 +540,7 @@ trait Tables {
   }
 
   /** Table description of table tokens. Objects of this class serve as prototypes for rows in queries. */
-  class Tokens(_tableTag: Tag) extends profile.api.Table[TokensRow](_tableTag, Some("ethereum"), "tokens") {
+  class Tokens(_tableTag: Tag) extends profile.api.Table[TokensRow](_tableTag, Some("mantis"), "tokens") {
     def * =
       (address, blockHash, blockNumber, name, symbol, decimals, totalSupply) <> (TokensRow.tupled, TokensRow.unapply)
 
@@ -623,7 +614,7 @@ trait Tables {
 
   /** Table description of table token_transfers. Objects of this class serve as prototypes for rows in queries. */
   class TokenTransfers(_tableTag: Tag)
-      extends profile.api.Table[TokenTransfersRow](_tableTag, Some("ethereum"), "token_transfers") {
+      extends profile.api.Table[TokenTransfersRow](_tableTag, Some("mantis"), "token_transfers") {
     def * =
       (blockNumber, transactionHash, fromAddress, toAddress, value) <> (TokenTransfersRow.tupled, TokenTransfersRow.unapply)
 
@@ -718,7 +709,7 @@ trait Tables {
 
   /** Table description of table transactions. Objects of this class serve as prototypes for rows in queries. */
   class Transactions(_tableTag: Tag)
-      extends profile.api.Table[TransactionsRow](_tableTag, Some("ethereum"), "transactions") {
+      extends profile.api.Table[TransactionsRow](_tableTag, Some("mantis"), "transactions") {
     def * =
       (hash, blockHash, blockNumber, from, gas, gasPrice, input, nonce, to, transactionIndex, value, v, r, s) <> (TransactionsRow.tupled, TransactionsRow.unapply)
 
@@ -811,8 +802,8 @@ trait Tables {
     /** Database column s SqlType(text) */
     val s: Rep[String] = column[String]("s")
 
-    /** Foreign key referencing Blocks (database name ethereum_transactions_block_hash_fkey) */
-    lazy val blocksFk = foreignKey("ethereum_transactions_block_hash_fkey", blockHash, Blocks)(
+    /** Foreign key referencing Blocks (database name mantis_transactions_block_hash_fkey) */
+    lazy val blocksFk = foreignKey("mantis_transactions_block_hash_fkey", blockHash, Blocks)(
       r => r.hash,
       onUpdate = ForeignKeyAction.NoAction,
       onDelete = ForeignKeyAction.NoAction
