@@ -1,8 +1,7 @@
 package tech.cryptonomic.conseil.common.mantis.rpc
 
 import io.circe.{Decoder, Encoder, HCursor, Json}
-
-import tech.cryptonomic.conseil.common.EvmDomain.Bytecode
+import tech.cryptonomic.conseil.common.evm.domain.Bytecode
 import tech.cryptonomic.conseil.common.rpc.RpcClient.RpcRequest
 
 /**
@@ -23,7 +22,7 @@ object MantisRpcCommands {
   object EthBlockNumber extends MantisRpcMethod {
     val rpcMethod = "eth_blockNumber"
     case object Params
-    def request = RpcRequest("2.0", rpcMethod, Params, "bn")
+    def request = RpcRequest("2.0", rpcMethod, Params, s"$rpcMethod")
 
     implicit val encodeParams: Encoder[Params.type] = (_) => Json.arr()
   }
@@ -37,7 +36,7 @@ object MantisRpcCommands {
   object EthGetBlockByNumber extends MantisRpcMethod {
     val rpcMethod = "eth_getBlockByNumber"
     case class Params(number: String, verbosity: Boolean)
-    def request(number: String) = RpcRequest("2.0", rpcMethod, Params(number, false), s"egbbn_$number")
+    def request(number: String) = RpcRequest("2.0", rpcMethod, Params(number, false), s"${rpcMethod}_$number")
 
     implicit val encodeParams: Encoder[Params] = (params: Params) =>
       Json.arr(
@@ -53,7 +52,7 @@ object MantisRpcCommands {
   object EthGetTransactionByHash extends MantisRpcMethod {
     val rpcMethod = "eth_getTransactionByHash"
     case class Params(hash: String)
-    def request(hash: String) = RpcRequest("2.0", rpcMethod, Params(hash), s"egtbh_$hash")
+    def request(hash: String) = RpcRequest("2.0", rpcMethod, Params(hash), s"${rpcMethod}_$hash")
 
     implicit val encodeParams: Encoder[Params] = (params: Params) =>
       Json.arr(
@@ -68,7 +67,7 @@ object MantisRpcCommands {
   object EthGetTransactionReceipt extends MantisRpcMethod {
     val rpcMethod = "eth_getTransactionReceipt"
     case class Params(txHash: String)
-    def request(txHash: String) = RpcRequest("2.0", rpcMethod, Params(txHash), s"egtr_$txHash")
+    def request(txHash: String) = RpcRequest("2.0", rpcMethod, Params(txHash), s"${rpcMethod}_$txHash")
 
     implicit val encodeParams: Encoder[Params] = (params: Params) =>
       Json.arr(
@@ -84,7 +83,7 @@ object MantisRpcCommands {
     val rpcMethod = "eth_getCode"
     case class Params(address: String, blockNumber: String)
     def request(address: String, blockNumber: String) =
-      RpcRequest("2.0", rpcMethod, Params(address, blockNumber), s"egc_$address")
+      RpcRequest("2.0", rpcMethod, Params(address, blockNumber), s"${rpcMethod}_$address")
 
     implicit val encodeParams: Encoder[Params] = (params: Params) =>
       Json.arr(
@@ -105,7 +104,7 @@ object MantisRpcCommands {
         data: String
     )
     def request(blockNumber: String, from: String, data: String) =
-      RpcRequest("2.0", rpcMethod, Params(blockNumber, from, data), s"ec_$from")
+      RpcRequest("2.0", rpcMethod, Params(blockNumber, from, data), s"${rpcMethod}_$from")
 
     implicit val encodeParams: Encoder[Params] = (params: Params) =>
       Json.arr(

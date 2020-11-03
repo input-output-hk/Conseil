@@ -6,10 +6,10 @@ import fs2.{Pipe, Stream}
 import io.circe.generic.auto._
 import org.http4s.circe.CirceEntityDecoder._
 import org.http4s.circe.CirceEntityEncoder._
-import tech.cryptonomic.conseil.common.EvmDomain.{Bytecode, Contract, Token}
 import tech.cryptonomic.conseil.common.rpc.RpcClient
 import tech.cryptonomic.conseil.common.ethereum.rpc.EthereumRpcCommands._
 import tech.cryptonomic.conseil.common.ethereum.rpc.json.{Block, Transaction, TransactionReceipt}
+import tech.cryptonomic.conseil.common.evm.domain.{Bytecode, Contract, Token}
 import tech.cryptonomic.conseil.common.util.HexUtil.hexToString
 import tech.cryptonomic.conseil.common.util.CryptoUtil.keccak
 

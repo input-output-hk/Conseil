@@ -1,6 +1,6 @@
 # Mantis-Indexer-API
 
-Mantis-Conseil is a fork of [Conseil](https://github.com/input-output-hk/mantis-conseil) to include support for mantis.
+Mantis-Conseil is a fork of [Conseil](https://github.com/Cryptonomic/Conseil) to include support for mantis.
 
 Conseil is an indexer and API for blockchains and consists of two processes:
 - Lorre: it indexes the blockchain by downloading data from a blockchain node and storing it in a database.

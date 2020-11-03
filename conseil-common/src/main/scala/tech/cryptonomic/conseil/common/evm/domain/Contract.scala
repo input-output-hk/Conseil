@@ -1,8 +1,5 @@
-package tech.cryptonomic.conseil.common.EvmDomain
+package tech.cryptonomic.conseil.common.evm.domain
 
-/**
-  * Ethereum contract.
-  */
 case class Contract(
     address: String,
     blockHash: String,

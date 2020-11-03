@@ -4,13 +4,12 @@ import cats.effect.{Concurrent, Resource}
 import com.typesafe.scalalogging.LazyLogging
 import fs2.Stream
 import slickeffect.Transactor
-
 import tech.cryptonomic.conseil.common.config.Platforms.EthereumBatchFetchConfiguration
 import tech.cryptonomic.conseil.common.rpc.RpcClient
 import tech.cryptonomic.conseil.common.ethereum.EthereumPersistence
 import tech.cryptonomic.conseil.common.ethereum.rpc.EthereumClient
+import tech.cryptonomic.conseil.common.evm.domain.{Bytecode, Contract}
 import tech.cryptonomic.conseil.indexer.config.{Custom, Depth, Everything, Newest}
-import tech.cryptonomic.conseil.common.EvmDomain.{Bytecode, Contract}
 
 /**
   * Ethereum operations for Lorre.

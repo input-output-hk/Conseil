@@ -20,7 +20,7 @@ trait Views {
   case class AccountsRow(address: String, value: scala.math.BigDecimal)
 
   /** Table description of view accounts. Objects of this class serve as prototypes for rows in queries. */
-  class Accounts(_tableTag: Tag) extends profile.api.Table[AccountsRow](_tableTag, Some("bitcoin"), "accounts") {
+  class Accounts(_tableTag: Tag) extends profile.api.Table[AccountsRow](_tableTag, Some("mantis"), "accounts") {
     def * = (address, value) <> (AccountsRow.tupled, AccountsRow.unapply)
 
     /** Database column address SqlType(text) */

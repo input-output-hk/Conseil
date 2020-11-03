@@ -1,8 +1,7 @@
 package tech.cryptonomic.conseil.common.ethereum.rpc
 
 import io.circe.{Decoder, Encoder, HCursor, Json}
-
-import tech.cryptonomic.conseil.common.EvmDomain.Bytecode
+import tech.cryptonomic.conseil.common.evm.domain.Bytecode
 import tech.cryptonomic.conseil.common.rpc.RpcClient.RpcRequest
 
 /**

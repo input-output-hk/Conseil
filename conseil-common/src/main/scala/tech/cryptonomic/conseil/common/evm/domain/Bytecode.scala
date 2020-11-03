@@ -1,4 +1,4 @@
-package tech.cryptonomic.conseil.common.EvmDomain
+package tech.cryptonomic.conseil.common.evm.domain
 
 import tech.cryptonomic.conseil.common.util.CryptoUtil.keccak
 

@@ -6,8 +6,7 @@ import fs2.{Pipe, Stream}
 import io.circe.generic.auto._
 import org.http4s.circe.CirceEntityDecoder._
 import org.http4s.circe.CirceEntityEncoder._
-
-import tech.cryptonomic.conseil.common.EvmDomain.{Bytecode, Contract, Token}
+import tech.cryptonomic.conseil.common.evm.domain.{Bytecode, Contract, Token}
 import tech.cryptonomic.conseil.common.rpc.RpcClient
 import tech.cryptonomic.conseil.common.mantis.rpc.MantisRpcCommands._
 import tech.cryptonomic.conseil.common.mantis.rpc.json.{Block, Transaction, TransactionReceipt}

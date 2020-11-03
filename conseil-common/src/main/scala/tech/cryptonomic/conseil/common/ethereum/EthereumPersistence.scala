@@ -12,7 +12,7 @@ import tech.cryptonomic.conseil.common.util.Conversion.Syntax._
 import tech.cryptonomic.conseil.common.ethereum.rpc.json.{Block, Log, Transaction}
 import tech.cryptonomic.conseil.common.ethereum.EthereumPersistence._
 import tech.cryptonomic.conseil.common.ethereum.rpc.json.TransactionReceipt
-import tech.cryptonomic.conseil.common.EvmDomain.{Contract, Token}
+import tech.cryptonomic.conseil.common.evm.domain.{Contract, Token}
 
 /**
   * Ethereum persistence into the database using Slick.
