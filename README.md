@@ -70,7 +70,7 @@ conseil=# \i ~/mantis-indexer-api/sql/mantis.sql
 **1.5 Configuration Files**
 
 When running lore and conseil-api, we will need a custom configuration file.
-There is a reference file in the respository -> `~/mantis-conseil/mantis.conf`
+There is a reference file in the respository -> `~/mantis-indexer-api/mantis.conf`
 
 *Improtant configurations:*
 1. Platforms: These represent the client and network that lorre and conseil will be indexing and querying. Note that `node` configurations are the one to most likely need changes (if the user has a different protocol/ip/port)
