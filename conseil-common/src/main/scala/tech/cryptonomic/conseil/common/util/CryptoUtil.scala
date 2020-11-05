@@ -1,6 +1,7 @@
 package tech.cryptonomic.conseil.common.util
 
 import fr.acinq.bitcoin.Base58Check
+import scorex.crypto.hash.Keccak256
 import scorex.util.encode.{Base16 => Hex}
 
 import scala.util.Try
@@ -163,5 +164,11 @@ object CryptoUtil {
       .map(readSigned)
 
   }
+
+  /**
+    * Create SHA-3 signature from the first 4 bytes of the given string.
+    */
+  def keccak(value: String): String =
+    Keccak256(value.replace(" ", "")).take(4).map("%02X".format(_)).mkString
 
 }

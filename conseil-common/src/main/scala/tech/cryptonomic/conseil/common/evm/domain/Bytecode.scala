@@ -1,6 +1,6 @@
-package tech.cryptonomic.conseil.common.ethereum.domain
+package tech.cryptonomic.conseil.common.evm.domain
 
-import tech.cryptonomic.conseil.common.ethereum.Utils
+import tech.cryptonomic.conseil.common.util.CryptoUtil.keccak
 
 /**
   * Ethereum contract bytecode disassembler.
@@ -57,9 +57,9 @@ case class Bytecode(value: String) {
 
   /**
     * Check if bytecode implements a particular function.
-    * Every function call is represented in the bytecode 
+    * Every function call is represented in the bytecode
     * by PUSH4 command with 4 bytes signature.
-    * 
+    *
     * example:
     * ...
     * DUP1
@@ -70,7 +70,7 @@ case class Bytecode(value: String) {
     */
   def implements(function: String): Boolean =
     opcodes.exists(
-      o => o.instruction.name == "PUSH4" && o.parameters == BigInt(Utils.keccak(function), 16)
+      o => o.instruction.name == "PUSH4" && o.parameters == BigInt(keccak(function), 16)
     )
 
   // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md

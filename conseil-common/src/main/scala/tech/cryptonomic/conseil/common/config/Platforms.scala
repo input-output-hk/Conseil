@@ -35,6 +35,11 @@ object Platforms {
     val name: String = "quorum"
   }
 
+  /** Represents blockchain platform for Mantis */
+  case object Mantis extends BlockchainPlatform {
+    val name: String = "mantis"
+  }
+
   object BlockchainPlatform {
 
     /** maps a generic string to a typed BlockchainPlatform */
@@ -45,6 +50,7 @@ object Platforms {
       case Bitcoin.name => Bitcoin
       case Ethereum.name => Ethereum
       case Quorum.name => Quorum
+      case Mantis.name => Mantis
     }
   }
 
@@ -194,4 +200,44 @@ object Platforms {
     lazy val toEthereumConfiguration = EthereumConfiguration(network, enabled, node, retry, batching)
   }
 
+  /**
+    * Configurations to describe a Mantis retry policy.
+    *
+    * @param maxWait Max wait time between attempts
+    * @param maxRetry retry count
+    */
+  final case class MantisRetryConfiguration(
+      maxWait: Duration,
+      maxRetry: Int
+  )
+
+  /**
+    * Configurations to describe a Mantis batch fetch.
+    *
+    * @param indexerThreadsCount The number of threads used by the Lorre process
+    * @param httpFetchThreadsCount The number of theread used by the http4s
+    * @param blocksBatchSize The number of the blocks batched into one JSON-RPC request
+    * @param transactionsBatchSize The number of the transactions batched into one JSON-RPC request
+    * @param contractsBatchSize The number of the contracts batched into one JSON-RPC request
+    * @param tokensBatchSize The number of the tokens batched into one JSON-RPC request
+    */
+  final case class MantisBatchFetchConfiguration(
+      indexerThreadsCount: Int,
+      httpFetchThreadsCount: Int,
+      blocksBatchSize: Int,
+      transactionsBatchSize: Int,
+      contractsBatchSize: Int,
+      tokensBatchSize: Int
+  )
+
+  /** collects all config related to a Mantis network */
+  final case class MantisConfiguration(
+      network: String,
+      enabled: Boolean,
+      node: URL,
+      retry: MantisRetryConfiguration,
+      batching: MantisBatchFetchConfiguration
+  ) extends PlatformConfiguration {
+    override val platform: BlockchainPlatform = Mantis
+  }
 }

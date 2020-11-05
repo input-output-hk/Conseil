@@ -56,4 +56,9 @@ class CryptoUtilTest extends AnyFlatSpec with Matchers {
         BigInt(-9)
       )
     }
+
+  it should "create sha-3 signature for string value" in {
+    CryptoUtil.keccak("totalSupply()") shouldBe "18160DDD"
+  }
+
 }

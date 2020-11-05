@@ -1,4 +1,4 @@
-package tech.cryptonomic.conseil.common.ethereum
+package tech.cryptonomic.conseil.common.mantis
 
 import java.sql.Timestamp
 import java.time.Instant
@@ -7,20 +7,19 @@ import cats.Id
 import cats.effect.{Concurrent, Resource}
 import com.typesafe.scalalogging.LazyLogging
 import slick.jdbc.PostgresProfile.api._
-import tech.cryptonomic.conseil.common.util.{Conversion, HexUtil}
-import tech.cryptonomic.conseil.common.util.Conversion.Syntax._
-import tech.cryptonomic.conseil.common.ethereum.rpc.json.{Block, Log, Transaction}
-import tech.cryptonomic.conseil.common.ethereum.EthereumPersistence._
-import tech.cryptonomic.conseil.common.ethereum.rpc.json.TransactionReceipt
 import tech.cryptonomic.conseil.common.evm.domain.{Contract, Token}
+import tech.cryptonomic.conseil.common.util.Conversion
+import tech.cryptonomic.conseil.common.util.Conversion.Syntax._
+import tech.cryptonomic.conseil.common.util.HexUtil.hexStringToBigDecimal
+import tech.cryptonomic.conseil.common.mantis.rpc.json.{Block, Log, Transaction}
+import tech.cryptonomic.conseil.common.mantis.MantisPersistence._
+import tech.cryptonomic.conseil.common.mantis.rpc.json.TransactionReceipt
 
-/**
-  * Ethereum persistence into the database using Slick.
-  */
-class EthereumPersistence[F[_]: Concurrent] extends LazyLogging {
+class MantisPersistence[F[_]: Concurrent] extends LazyLogging {
 
   /**
     * SHA-3 signature for: Transfer(address,address,uint256)
+    * FIXME: verify and fix compatibility with Mantis - current implementation is for Ethereum
     */
   private val tokenTransferSignature = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
 
@@ -54,6 +53,8 @@ class EthereumPersistence[F[_]: Concurrent] extends LazyLogging {
     * Create [[DBIO]] seq with contracts.
     *
     * @param logs JSON_RPC contract
+    *
+    * FIXME: verify and fix compatibility with Mantis - current implementation is for Ethereum
     */
   def createContracts(contracts: List[Contract]) =
     DBIO.seq(
@@ -64,6 +65,8 @@ class EthereumPersistence[F[_]: Concurrent] extends LazyLogging {
     * Create [[DBIO]] seq with tokens.
     *
     * @param logs JSON_RPC token
+    *
+    * FIXME: verify and fix compatibility with Mantis - current implementation is for Ethereum
     */
   def createTokens(tokens: List[Token]) =
     DBIO.seq(
@@ -96,13 +99,13 @@ class EthereumPersistence[F[_]: Concurrent] extends LazyLogging {
       .result
 }
 
-object EthereumPersistence {
+object MantisPersistence {
 
   /**
-    * Create [[cats.Resource]] with [[EthereumPersistence]].
+    * Create [[cats.Resource]] with [[MantisPersistence]].
     */
-  def resource[F[_]: Concurrent]: Resource[F, EthereumPersistence[F]] =
-    Resource.pure(new EthereumPersistence[F])
+  def resource[F[_]: Concurrent]: Resource[F, MantisPersistence[F]] =
+    Resource.pure(new MantisPersistence[F])
 
   /**
     * Convert form [[Block]] to [[Tables.BlocksRow]]
@@ -120,7 +123,6 @@ object EthereumPersistence {
         gasUsed = from.gasUsed,
         logsBloom = from.logsBloom,
         miner = from.miner,
-        mixHash = from.mixHash,
         nonce = from.nonce,
         parentHash = from.parentHash,
         receiptsRoot = from.receiptsRoot,
@@ -138,6 +140,7 @@ object EthereumPersistence {
     * Convert form [[Transaction]] to [[Tables.TransactionsRow]]
     * TODO: This conversion should be done with the Chimney,
     *       but it's blocked due to the https://github.com/scala/bug/issues/11157
+    * FIXME: change to Mantis transaction (current implementation is for Ethereum)
     */
   implicit val transactionToTransactionsRow: Conversion[Id, Transaction, Tables.TransactionsRow] =
     new Conversion[Id, Transaction, Tables.TransactionsRow] {
@@ -153,7 +156,7 @@ object EthereumPersistence {
           nonce = from.nonce,
           to = from.to,
           transactionIndex = from.transactionIndex,
-          value = HexUtil.hexStringToBigDecimal(from.value),
+          value = hexStringToBigDecimal(from.value),
           v = from.v,
           r = from.r,
           s = from.s
@@ -164,6 +167,7 @@ object EthereumPersistence {
     * Convert form [[TransactionReceipt]] to [[Tables.ReceiptsRow]]
     * TODO: This conversion should be done with the Chimney,
     *       but it's blocked due to the https://github.com/scala/bug/issues/11157
+    * FIXME: change to Mantis transaction receipt (current implementation is for Ethereum)
     */
   implicit val transactionReceiptToReceiptsRow: Conversion[Id, TransactionReceipt, Tables.ReceiptsRow] =
     new Conversion[Id, TransactionReceipt, Tables.ReceiptsRow] {
@@ -186,6 +190,7 @@ object EthereumPersistence {
     * Convert form [[Log]] to [[Tables.LogsRow]]
     * TODO: This conversion should be done with the Chimney,
     *       but it's blocked due to the https://github.com/scala/bug/issues/11157
+    * FIXME: adapt to Mantis logs (current implementation is for Ethereum)
     */
   implicit val logToLogsRow: Conversion[Id, Log, Tables.LogsRow] =
     new Conversion[Id, Log, Tables.LogsRow] {
@@ -207,6 +212,7 @@ object EthereumPersistence {
     * Convert form [[Contract]] to [[Tables.ContractsRow]]
     * TODO: This conversion should be done with the Chimney,
     *       but it's blocked due to the https://github.com/scala/bug/issues/11157
+    * FIXME: adapt to Mantis contracts (current implementation is for Ethereum)
     */
   implicit val contractToContractsRow: Conversion[Id, Contract, Tables.ContractsRow] =
     new Conversion[Id, Contract, Tables.ContractsRow] {
@@ -225,6 +231,7 @@ object EthereumPersistence {
     * Convert form [[Log]] to [[Tables.TokenTransfersRow]]
     * TODO: This conversion should be done with the Chimney,
     *       but it's blocked due to the https://github.com/scala/bug/issues/11157
+    * FIXME: adapt to Mantis Tokens (current implementation is for Ethereum)
     */
   implicit val logToTokenTransfersRow: Conversion[Id, Log, Tables.TokenTransfersRow] =
     new Conversion[Id, Log, Tables.TokenTransfersRow] {
@@ -234,7 +241,7 @@ object EthereumPersistence {
           transactionHash = from.transactionHash,
           fromAddress = from.topics(1),
           toAddress = from.topics(2),
-          value = HexUtil.hexStringToBigDecimal(from.data)
+          value = hexStringToBigDecimal(from.data)
         )
     }
 
@@ -242,6 +249,7 @@ object EthereumPersistence {
     * Convert form [[Token]] to [[Tables.TokensRow]]
     * TODO: This conversion should be done with the Chimney,
     *       but it's blocked due to the https://github.com/scala/bug/issues/11157
+    * FIXME: adapt to Mantis Tokens (current one is for Ethereum)
     */
   implicit val tokenToTokensRow: Conversion[Id, Token, Tables.TokensRow] =
     new Conversion[Id, Token, Tables.TokensRow] {

@@ -1,4 +1,4 @@
-package tech.cryptonomic.conseil.common.ethereum.rpc
+package tech.cryptonomic.conseil.common.mantis.rpc
 
 import cats.effect.{Concurrent, Resource}
 import com.typesafe.scalalogging.LazyLogging
@@ -6,32 +6,32 @@ import fs2.{Pipe, Stream}
 import io.circe.generic.auto._
 import org.http4s.circe.CirceEntityDecoder._
 import org.http4s.circe.CirceEntityEncoder._
-import tech.cryptonomic.conseil.common.rpc.RpcClient
-import tech.cryptonomic.conseil.common.ethereum.rpc.EthereumRpcCommands._
-import tech.cryptonomic.conseil.common.ethereum.rpc.json.{Block, Transaction, TransactionReceipt}
 import tech.cryptonomic.conseil.common.evm.domain.{Bytecode, Contract, Token}
+import tech.cryptonomic.conseil.common.rpc.RpcClient
+import tech.cryptonomic.conseil.common.mantis.rpc.MantisRpcCommands._
+import tech.cryptonomic.conseil.common.mantis.rpc.json.{Block, Transaction, TransactionReceipt}
 import tech.cryptonomic.conseil.common.util.HexUtil.hexToString
 import tech.cryptonomic.conseil.common.util.CryptoUtil.keccak
 
 /**
-  * Ethereum JSON-RPC client according to the specification at https://eth.wiki/json-rpc/API
+  * Mantis JSON-RPC client according to the specification at https://eth.wiki/json-rpc/API
   *
-  * @param client [[RpcClient]] to use with the Ethereum JSON-RPC api.
+  * @param client [[RpcClient]] to use with the Mantis JSON-RPC api.
   *
   * * Usage example:
   *
   * {{{
   *   import cats.effect.IO
   *
-  *   val ethereumClient = new EthereumClient[IO](rpcClient)
+  *   val mantisClient = new MantisClient[IO](rpcClient)
   *
   *   // To call [[fs2.Pipe]] methods use:
-  *   Stream(1, 2).through(ethereumClient.getBlockByNumber(batchSize = 10)).compile.toList
+  *   Stream(1, 2).through(mantisClient.getBlockByNumber(batchSize = 10)).compile.toList
   *   // The result will be:
   *   val res0: List[Block] = List(block1, block2)
   * }}}
   */
-class EthereumClient[F[_]: Concurrent](
+class MantisClient[F[_]: Concurrent](
     client: RpcClient[F]
 ) extends LazyLogging {
 
@@ -129,13 +129,13 @@ class EthereumClient[F[_]: Concurrent](
 
 }
 
-object EthereumClient {
+object MantisClient {
 
   /**
-    * Create [[cats.Resource]] with [[EthereumClient]].
+    * Create [[cats.Resource]] with [[MantisClient]].
     *
-    * @param client [[RpcClient]] to use with the EthereumClient JSON-RPC api.
+    * @param client [[RpcClient]] to use with the MantisClient JSON-RPC api.
     */
-  def resource[F[_]: Concurrent](client: RpcClient[F]): Resource[F, EthereumClient[F]] =
-    Resource.pure(new EthereumClient[F](client))
+  def resource[F[_]: Concurrent](client: RpcClient[F]): Resource[F, MantisClient[F]] =
+    Resource.pure(new MantisClient[F](client))
 }

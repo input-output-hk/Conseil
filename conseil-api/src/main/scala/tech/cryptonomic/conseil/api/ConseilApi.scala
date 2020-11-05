@@ -19,7 +19,12 @@ import tech.cryptonomic.conseil.api.routes.Docs
 import tech.cryptonomic.conseil.api.routes.info.AppInfo
 import tech.cryptonomic.conseil.api.routes.platform.data.ApiDataRoutes
 import tech.cryptonomic.conseil.api.routes.platform.data.bitcoin.{BitcoinDataOperations, BitcoinDataRoutes}
-import tech.cryptonomic.conseil.api.routes.platform.data.ethereum.{EthereumDataOperations, EthereumDataRoutes, QuorumDataRoutes}
+import tech.cryptonomic.conseil.api.routes.platform.data.ethereum.{
+  EthereumDataOperations,
+  EthereumDataRoutes,
+  QuorumDataRoutes
+}
+import tech.cryptonomic.conseil.api.routes.platform.data.mantis.{MantisDataOperations, MantisDataRoutes}
 import tech.cryptonomic.conseil.api.routes.platform.data.tezos.{TezosDataOperations, TezosDataRoutes}
 import tech.cryptonomic.conseil.api.routes.platform.discovery.{GenericPlatformDiscoveryOperations, PlatformDiscovery}
 import tech.cryptonomic.conseil.api.security.Security
@@ -53,7 +58,7 @@ class ConseilApi(config: CombinedConfiguration)(implicit system: ActorSystem)
   implicit private val contextShift: ContextShift[IO] = IO.contextShift(dispatcher)
 
   config.nautilusCloud match {
-    case ncc@NautilusCloudConfiguration(true, _, _, _, _, delay, interval) =>
+    case ncc @ NautilusCloudConfiguration(true, _, _, _, _, delay, interval) =>
       system.scheduler.schedule(delay, interval)(Security.updateKeys(ncc))
     case _ => ()
   }
@@ -152,6 +157,9 @@ class ConseilApi(config: CombinedConfiguration)(implicit system: ActorSystem)
       case Platforms.Quorum =>
         val operations = new EthereumDataOperations(Platforms.Quorum.name)
         QuorumDataRoutes(metadataService, config.metadata, operations, config.server.maxQueryResultSize)
+      case Platforms.Mantis =>
+        val operations = new MantisDataOperations(Platforms.Mantis.name)
+        MantisDataRoutes(metadataService, config.metadata, operations, config.server.maxQueryResultSize)
     }
 
     private val cacheOverrides = new AttributeValuesCacheConfiguration(config.metadata)

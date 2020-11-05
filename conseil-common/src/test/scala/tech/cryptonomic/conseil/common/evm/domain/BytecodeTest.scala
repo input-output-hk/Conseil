@@ -1,8 +1,7 @@
-package tech.cryptonomic.conseil.common.ethereum.domain
+package tech.cryptonomic.conseil.common.evm.domain
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-
 import tech.cryptonomic.conseil.common.ethereum.EthereumFixtures
 
 class BytecodeTest extends AnyWordSpec with Matchers with EthereumFixtures {
