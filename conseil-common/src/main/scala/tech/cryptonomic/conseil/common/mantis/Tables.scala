@@ -399,27 +399,22 @@ trait Tables {
   lazy val Logs = new TableQuery(tag => new Logs(tag))
 
   /** Entity class storing rows of table Receipts
-    *  @param transactionHash Database column transaction_hash SqlType(text)
+    *
+    *  @param transactionHash  Database column transaction_hash SqlType(text)
     *  @param transactionIndex Database column transaction_index SqlType(text)
-    *  @param blockHash Database column block_hash SqlType(text)
-    *  @param blockNumber Database column block_number SqlType(int4)
-    *  @param contractAddress Database column contract_address SqlType(text), Default(None)
+    *  @param blockNumber      Database column block_number SqlType(int4)
+    *  @param blockHash        Database column block_hash SqlType(text)
     *  @param cumulativeGasUsed Database column cumulative_gas_used SqlType(text)
-    *  @param gasUsed Database column gas_used SqlType(text)
-    *  @param logsBloom Database column logs_bloom SqlType(text)
-    *  @param status Database column status SqlType(text), Default(None)
-    *  @param root Database column root SqlType(text), Default(None) */
+    *  @param gasUsed          Database column gas_used SqlType(text)
+    *  @param contractAddress  Database column contract_address SqlType(text), Default(None)*/
   case class ReceiptsRow(
       transactionHash: String,
       transactionIndex: String,
-      blockHash: String,
       blockNumber: Int,
-      contractAddress: Option[String] = None,
+      blockHash: String,
       cumulativeGasUsed: String,
       gasUsed: String,
-      logsBloom: String,
-      status: Option[String] = None,
-      root: Option[String] = None
+      contractAddress: Option[String] = None
   )
 
   /** GetResult implicit for fetching ReceiptsRow objects using plain SQL queries */
@@ -430,13 +425,10 @@ trait Tables {
         (
           <<[String],
           <<[String],
-          <<[String],
           <<[Int],
-          <<?[String],
           <<[String],
           <<[String],
           <<[String],
-          <<?[String],
           <<?[String]
         )
       )
@@ -448,14 +440,11 @@ trait Tables {
       (
         transactionHash,
         transactionIndex,
-        blockHash,
         blockNumber,
-        contractAddress,
+        blockHash,
         cumulativeGasUsed,
         gasUsed,
-        logsBloom,
-        status,
-        root
+        contractAddress
       ) <> (ReceiptsRow.tupled, ReceiptsRow.unapply)
 
     /** Maps whole row to an option. Useful for outer joins. */
@@ -464,19 +453,16 @@ trait Tables {
         (
           Rep.Some(transactionHash),
           Rep.Some(transactionIndex),
-          Rep.Some(blockHash),
           Rep.Some(blockNumber),
-          contractAddress,
+          Rep.Some(blockHash),
           Rep.Some(cumulativeGasUsed),
           Rep.Some(gasUsed),
-          Rep.Some(logsBloom),
-          status,
-          root
+          contractAddress
         )
       ).shaped.<>(
         { r =>
           import r._;
-          _1.map(_ => ReceiptsRow.tupled((_1.get, _2.get, _3.get, _4.get, _5, _6.get, _7.get, _8.get, _9, _10)))
+          _1.map(_ => ReceiptsRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7)))
         },
         (_: Any) => throw new Exception("Inserting into ? projection not supported.")
       )
@@ -502,14 +488,6 @@ trait Tables {
     /** Database column gas_used SqlType(text) */
     val gasUsed: Rep[String] = column[String]("gas_used")
 
-    /** Database column logs_bloom SqlType(text) */
-    val logsBloom: Rep[String] = column[String]("logs_bloom")
-
-    /** Database column status SqlType(text), Default(None) */
-    val status: Rep[Option[String]] = column[Option[String]]("status", O.Default(None))
-
-    /** Database column root SqlType(text), Default(None) */
-    val root: Rep[Option[String]] = column[Option[String]]("root", O.Default(None))
   }
 
   /** Collection-like TableQuery object for table Receipts */
@@ -649,34 +627,32 @@ trait Tables {
 
   /** Entity class storing rows of table Transactions
     *  @param hash Database column hash SqlType(text), PrimaryKey
+    *  @param nonce Database column nonce SqlType(text)
     *  @param blockHash Database column block_hash SqlType(text)
     *  @param blockNumber Database column block_number SqlType(int4)
-    *  @param from Database column from SqlType(text)
-    *  @param gas Database column gas SqlType(text)
-    *  @param gasPrice Database column gas_price SqlType(text)
-    *  @param input Database column input SqlType(text)
-    *  @param nonce Database column nonce SqlType(text)
-    *  @param to Database column to SqlType(text), Default(None)
     *  @param transactionIndex Database column transaction_index SqlType(text)
+    *  @param from Database column from SqlType(text)
+    *  @param to Database column to SqlType(text), Default(None)
     *  @param value Database column value SqlType(numeric)
-    *  @param v Database column v SqlType(text)
-    *  @param r Database column r SqlType(text)
-    *  @param s Database column s SqlType(text) */
+    *  @param gasPrice Database column gas_price SqlType(text)
+    *  @param gas Database column gas SqlType(text)
+    *  @param input Database column input SqlType(text)
+    *  @param pending Database column pending SqlType(text), Default(None)
+    *  @param isOutgoing Database column isOutgoing SqlType(text), Default(None) */
   case class TransactionsRow(
       hash: String,
+      nonce: String,
       blockHash: String,
       blockNumber: Int,
-      from: String,
-      gas: String,
-      gasPrice: String,
-      input: String,
-      nonce: String,
-      to: Option[String] = None,
       transactionIndex: String,
+      from: String,
+      to: Option[String],
       value: scala.math.BigDecimal,
-      v: String,
-      r: String,
-      s: String
+      gasPrice: String,
+      gas: String,
+      input: String,
+      pending: Option[Boolean],
+      isOutgoing: Option[Boolean]
   )
 
   /** GetResult implicit for fetching TransactionsRow objects using plain SQL queries */
@@ -691,18 +667,17 @@ trait Tables {
       (
         <<[String],
         <<[String],
+        <<[String],
         <<[Int],
         <<[String],
         <<[String],
-        <<[String],
-        <<[String],
-        <<[String],
         <<?[String],
-        <<[String],
         <<[scala.math.BigDecimal],
         <<[String],
         <<[String],
-        <<[String]
+        <<[String],
+        <<?[Boolean],
+        <<?[Boolean]
       )
     )
   }
@@ -711,26 +686,25 @@ trait Tables {
   class Transactions(_tableTag: Tag)
       extends profile.api.Table[TransactionsRow](_tableTag, Some("mantis"), "transactions") {
     def * =
-      (hash, blockHash, blockNumber, from, gas, gasPrice, input, nonce, to, transactionIndex, value, v, r, s) <> (TransactionsRow.tupled, TransactionsRow.unapply)
+      (hash, nonce, blockHash, blockNumber, transactionIndex, from, to, value, gasPrice, gas,  input, pending, isOutgoing ) <> (TransactionsRow.tupled, TransactionsRow.unapply)
 
     /** Maps whole row to an option. Useful for outer joins. */
     def ? =
       (
         (
           Rep.Some(hash),
+          Rep.Some(nonce),
           Rep.Some(blockHash),
           Rep.Some(blockNumber),
-          Rep.Some(from),
-          Rep.Some(gas),
-          Rep.Some(gasPrice),
-          Rep.Some(input),
-          Rep.Some(nonce),
-          to,
           Rep.Some(transactionIndex),
+          Rep.Some(from),
+          to,
           Rep.Some(value),
-          Rep.Some(v),
-          Rep.Some(r),
-          Rep.Some(s)
+          Rep.Some(gasPrice),
+          Rep.Some(gas),
+          Rep.Some(input),
+          pending,
+          isOutgoing
         )
       ).shaped.<>(
         { r =>
@@ -745,14 +719,13 @@ trait Tables {
                   _4.get,
                   _5.get,
                   _6.get,
-                  _7.get,
+                  _7,
                   _8.get,
-                  _9,
+                  _9.get,
                   _10.get,
                   _11.get,
-                  _12.get,
-                  _13.get,
-                  _14.get
+                  _12,
+                  _13
                 )
               )
           )
@@ -763,44 +736,41 @@ trait Tables {
     /** Database column hash SqlType(text), PrimaryKey */
     val hash: Rep[String] = column[String]("hash", O.PrimaryKey)
 
+    /** Database column nonce SqlType(text) */
+    val nonce: Rep[String] = column[String]("nonce")
+
     /** Database column block_hash SqlType(text) */
     val blockHash: Rep[String] = column[String]("block_hash")
 
     /** Database column block_number SqlType(int4) */
     val blockNumber: Rep[Int] = column[Int]("block_number")
 
+    /** Database column transaction_index SqlType(text) */
+    val transactionIndex: Rep[String] = column[String]("transaction_index")
+
     /** Database column from SqlType(text) */
     val from: Rep[String] = column[String]("from")
-
-    /** Database column gas SqlType(text) */
-    val gas: Rep[String] = column[String]("gas")
-
-    /** Database column gas_price SqlType(text) */
-    val gasPrice: Rep[String] = column[String]("gas_price")
-
-    /** Database column input SqlType(text) */
-    val input: Rep[String] = column[String]("input")
-
-    /** Database column nonce SqlType(text) */
-    val nonce: Rep[String] = column[String]("nonce")
 
     /** Database column to SqlType(text), Default(None) */
     val to: Rep[Option[String]] = column[Option[String]]("to", O.Default(None))
 
-    /** Database column transaction_index SqlType(text) */
-    val transactionIndex: Rep[String] = column[String]("transaction_index")
-
     /** Database column value SqlType(numeric) */
     val value: Rep[scala.math.BigDecimal] = column[scala.math.BigDecimal]("value")
 
-    /** Database column v SqlType(text) */
-    val v: Rep[String] = column[String]("v")
+    /** Database column gas_price SqlType(text) */
+    val gasPrice: Rep[String] = column[String]("gas_price")
 
-    /** Database column r SqlType(text) */
-    val r: Rep[String] = column[String]("r")
+    /** Database column gas SqlType(text) */
+    val gas: Rep[String] = column[String]("gas")
 
-    /** Database column s SqlType(text) */
-    val s: Rep[String] = column[String]("s")
+    /** Database column input SqlType(text) */
+    val input: Rep[String] = column[String]("input")
+
+    /** Database column to SqlType(text), Default(None) */
+    val pending: Rep[Option[Boolean]] = column[Option[Boolean]]("pending", O.Default(None))
+
+    /** Database column to SqlType(text), Default(None) */
+    val isOutgoing: Rep[Option[Boolean]] = column[Option[Boolean]]("is_outgoing", O.Default(None))
 
     /** Foreign key referencing Blocks (database name mantis_transactions_block_hash_fkey) */
     lazy val blocksFk = foreignKey("mantis_transactions_block_hash_fkey", blockHash, Blocks)(

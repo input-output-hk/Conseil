@@ -140,26 +140,24 @@ object MantisPersistence {
     * Convert form [[Transaction]] to [[Tables.TransactionsRow]]
     * TODO: This conversion should be done with the Chimney,
     *       but it's blocked due to the https://github.com/scala/bug/issues/11157
-    * FIXME: change to Mantis transaction (current implementation is for Ethereum)
     */
   implicit val transactionToTransactionsRow: Conversion[Id, Transaction, Tables.TransactionsRow] =
     new Conversion[Id, Transaction, Tables.TransactionsRow] {
       override def convert(from: Transaction) =
         Tables.TransactionsRow(
           hash = from.hash,
+          nonce = from.nonce,
           blockHash = from.blockHash,
           blockNumber = Integer.decode(from.blockNumber),
-          from = from.from,
-          gas = from.gas,
-          gasPrice = from.gasPrice,
-          input = from.input,
-          nonce = from.nonce,
-          to = from.to,
           transactionIndex = from.transactionIndex,
+          from = from.from,
+          to = from.to,
           value = hexStringToBigDecimal(from.value),
-          v = from.v,
-          r = from.r,
-          s = from.s
+          gasPrice = from.gasPrice,
+          gas = from.gas,
+          input = from.input,
+          pending = from.pending,
+          isOutgoing = from.isOutgoing
         )
     }
 
@@ -167,22 +165,18 @@ object MantisPersistence {
     * Convert form [[TransactionReceipt]] to [[Tables.ReceiptsRow]]
     * TODO: This conversion should be done with the Chimney,
     *       but it's blocked due to the https://github.com/scala/bug/issues/11157
-    * FIXME: change to Mantis transaction receipt (current implementation is for Ethereum)
     */
   implicit val transactionReceiptToReceiptsRow: Conversion[Id, TransactionReceipt, Tables.ReceiptsRow] =
     new Conversion[Id, TransactionReceipt, Tables.ReceiptsRow] {
       override def convert(from: TransactionReceipt) =
         Tables.ReceiptsRow(
-          blockHash = from.blockHash,
-          blockNumber = Integer.decode(from.blockNumber),
           transactionHash = from.transactionHash,
           transactionIndex = from.transactionIndex,
-          contractAddress = from.contractAddress,
+          blockNumber = Integer.decode(from.blockNumber),
+          blockHash = from.blockHash,
           cumulativeGasUsed = from.cumulativeGasUsed,
           gasUsed = from.gasUsed,
-          logsBloom = from.logsBloom,
-          status = from.status,
-          root = from.root
+          contractAddress = from.contractAddress
         )
     }
 

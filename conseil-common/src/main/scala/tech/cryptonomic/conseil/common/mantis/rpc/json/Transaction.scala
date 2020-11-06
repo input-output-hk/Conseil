@@ -5,18 +5,17 @@ package tech.cryptonomic.conseil.common.mantis.rpc.json
   * More info at: https://eth.wiki/json-rpc/API
   */
 case class Transaction(
+    hash: String,
+    nonce: String,
     blockHash: String,
     blockNumber: String,
-    from: String,
-    gas: String,
-    gasPrice: String,
-    hash: String,
-    input: String,
-    nonce: String,
-    to: Option[String],
     transactionIndex: String,
+    from: String,
+    to: Option[String],
     value: String,
-    v: String,
-    r: String,
-    s: String
+    gasPrice: String,
+    gas: String,
+    input: String,
+    pending: Option[Boolean],
+    isOutgoing: Option[Boolean]
 )
