@@ -5,17 +5,12 @@ package tech.cryptonomic.conseil.common.mantis.rpc.json
   * More info at: https://eth.wiki/json-rpc/API
   */
 case class TransactionReceipt(
-    blockHash: String,
-    blockNumber: String,
-    contractAddress: Option[String],
-    cumulativeGasUsed: String,
-    from: String,
-    gasUsed: String,
-    logs: Seq[Log],
-    logsBloom: String,
-    status: Option[String],
-    root: Option[String],
-    to: Option[String],
     transactionHash: String,
-    transactionIndex: String
+    transactionIndex: String,
+    blockNumber: String,
+    blockHash: String,
+    cumulativeGasUsed: String,
+    gasUsed: String,
+    contractAddress: Option[String],
+    logs: Seq[Log]
 )

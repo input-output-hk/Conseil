@@ -43,19 +43,18 @@ CREATE TABLE mantis.blocks (
 -- Table is based on eth_getTransactionByHash from https://eth.wiki/json-rpc/API
 CREATE TABLE mantis.transactions (
   hash text NOT NULL PRIMARY KEY,
+  nonce text NOT NULL,
   block_hash text NOT NULL,
   block_number integer NOT NULL,
-  "from" text NOT NULL,
-  gas text NOT NULL,
-  gas_price text NOT NULL,
-  input text NOT NULL,
-  nonce text NOT NULL,
-  "to" text,
   transaction_index text NOT NULL,
+  "from" text NOT NULL,
+  "to" text,
   value numeric NOT NULL, -- value in wei
-  v text NOT NULL,
-  r text NOT NULL,
-  s text NOT NULL
+  gas_price text NOT NULL,
+  gas text NOT NULL,
+  input text NOT NULL,
+  pending boolean,
+  is_outgoing boolean
 );
 
 ALTER TABLE ONLY mantis.transactions
@@ -65,14 +64,11 @@ ALTER TABLE ONLY mantis.transactions
 CREATE TABLE mantis.receipts (
   transaction_hash text NOT NULL,
   transaction_index text NOT NULL,
-  block_hash text NOT NULL,
   block_number integer NOT NULL,
-  contract_address text,
+  block_hash text NOT NULL,
   cumulative_gas_used text NOT NULL,
   gas_used text NOT NULL,
-  logs_bloom text NOT NULL,
-  status text,
-  root text
+  contract_address text
 );
 
 -- Table is based on eth_getLogs from https://eth.wiki/json-rpc/API

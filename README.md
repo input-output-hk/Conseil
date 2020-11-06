@@ -148,11 +148,11 @@ The configuration file is the one from section [1.5]. The arguments are tha plat
 
 **Using sbt**
 ```sh
-sbt "runLorre mantis testnet" -Dconfig.file='<platform> <network>'
+sbt -Dconfig.file='<path/to/config/file.conf>' "runLorre <platform> <network>"
 ```
 For example, using the configuration file in section [1.5] to run mantis/testnet indexer:
 ```sh
-sbt "runLorre mantis testnet" -Dconfig.file='/home/<username>/mantis-indexer-api/mantis.conf'
+sbt -Dconfig.file='/home/<username>/mantis-indexer-api/mantis.conf' "runLorre mantis testnet"
 ```
 **Using the `.jar` files**
 
@@ -170,11 +170,11 @@ The configuration file is the one from section [1.5]. No mantis node is needed.
 
 **Using sbt**
 ```sh
-sbt "runApi" -Dconfig.file='<platform> <network>'
+sbt -Dconfig.file='<path/to/config/file.conf>' runApi
 ```
 For example, using the configuration file in section [1.5] to run mantis/testnet indexer:
 ```sh
-sbt "runApi" -Dconfig.file='/home/<username>/mantis-indexer-api/mantis.conf'
+sbt -Dconfig.file='/home/<username>/mantis-indexer-api/mantis.conf' runApi
 ```
 **Using the `.jar` files**
 ```sh
