@@ -49,23 +49,22 @@ $ cp /tmp/conseil-lorre.jar ~/path/to/your/directory/mantis-lorre.jar
 $ cp /tmp/conseil-api.jar ~/path/to/your/directory/mantis-api.jar
 ```
 
-**1.4 Generate db schema (necessary to run both Lorre and conseil-api)**
+**1.4 Create the database and generate mantis schema (necessary to run both Lorre and conseil-api)**
 
-Create DB and user and grant db privileges on that db to said user
-```sh
-$ sudo -u postgres psql
+Run the `db-creation.sh` script in the root of the project. This script will drop the db/user given in the configurations present in the file if they exist and create them again. Then it will run the `mantis.sql` file to generate the mantis schema.
 
-postgres=# create database conseil;
-postgres=# create user foo with encrypted password 'bar';
-postgres=# grant all privileges on database conseil to foo;
-```
-Connect to the db and generate the schema from `mantis.sql` in the repository
+Main configurations in the script:
+
 ```sh
-postgres=# \c conseil
-You are now connected to database "conseil" as user "postgres".
-conseil=# \i ~/mantis-indexer-api/sql/mantis.sql
+user="foo"
+pass="'bar'"
+db="conseil"
 ```
- After success output, the db is ready to be used by lorre and conseil
+
+These configurations are by default the same as in `mantis.conf`.
+Make sure to grant execution permission to the script before running it.
+
+After success output, the db is ready to be used by lorre and conseil.
 
 **1.5 Configuration Files**
 
